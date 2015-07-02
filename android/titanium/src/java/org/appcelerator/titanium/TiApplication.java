@@ -450,6 +450,17 @@ public abstract class TiApplication extends Application implements KrollApplicat
 		return cacheDir.getAbsoluteFile();
 	}
 
+	public void enableResponseCache()
+	{
+		responseCache.setCacheDir(getRemoteCacheDir());
+		TiResponseCache.setDefault(responseCache);
+	}
+
+	public void disableResponseCache()
+	{
+		TiResponseCache.setDefault(null);
+	}
+
 	public void setRootActivity(TiRootActivity rootActivity)
 	{
 		this.rootActivity = new WeakReference<TiRootActivity>(rootActivity);

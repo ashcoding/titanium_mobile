@@ -644,6 +644,18 @@ public class NetworkModule extends KrollModule {
 		return false;
 	}
 
+	@Kroll.method
+	public void disableResponseCache()
+	{
+		TiApplication.getInstance().disableResponseCache();
+	}
+
+	@Kroll.method
+	public void enableResponseCache()
+	{
+		TiApplication.getInstance().enableResponseCache();
+	}
+
 	@Override
 	public String getApiName()
 	{
