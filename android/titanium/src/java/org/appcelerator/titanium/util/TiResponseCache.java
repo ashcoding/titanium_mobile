@@ -305,6 +305,7 @@ public class TiResponseCache extends ResponseCache
 	public CacheResponse get(URI uri, String rqstMethod,
 			Map<String, List<String>> rqstHeaders) throws IOException 
 	{
+		Log.d("TiAsh", "CacheRequest get");
 		if (uri == null || cacheDir == null) return null;
 		
 		// Get our key, which is a hash of the URI
@@ -393,6 +394,7 @@ public class TiResponseCache extends ResponseCache
 	@Override
 	public CacheRequest put(URI uri, URLConnection conn) throws IOException
 	{
+		Log.d("TiAsh", "CacheRequest put");
 		if (cacheDir == null) return null;
 		
 		// Make sure the cacheDir exists, in case user clears cache while app is running
