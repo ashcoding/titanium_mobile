@@ -46,7 +46,7 @@ import android.widget.DatePicker;
 import android.widget.TimePicker;
 
 @Kroll.proxy(creatableInModule=UIModule.class, propertyAccessors={
-	"locale", "visibleItems", "value", TiC.PROPERTY_CALENDAR_VIEW_SHOWN, TiC.PROPERTY_FONT
+	"locale", "visibleItems", TiC.PROPERTY_CALENDAR_VIEW_SHOWN, TiC.PROPERTY_FONT
 })
 public class PickerProxy extends TiViewProxy implements PickerColumnListener
 {
@@ -63,6 +63,7 @@ public class PickerProxy extends TiViewProxy implements PickerColumnListener
 	private static final int MSG_FIRE_ROW_CHANGE = MSG_FIRST_ID + 106;
 	private static final int MSG_FORCE_LAYOUT = MSG_FIRST_ID + 107;
 	private boolean useSpinner = false;
+	private Date value;
 
 	public PickerProxy()
 	{
@@ -86,6 +87,9 @@ public class PickerProxy extends TiViewProxy implements PickerColumnListener
 		}
 		if (dict.containsKey("columns")) {
 			setColumns(dict.get("columns"));
+		}
+		if (dict.containsKey("value")) {
+			value = TiConvert.toDate(dict.get("value"));
 		}
 	}
 
@@ -144,6 +148,18 @@ public class PickerProxy extends TiViewProxy implements PickerColumnListener
 		return new TiUIDateSpinner(this, activity);
 	}
 	
+	@Kroll.getProperty @Kroll.method
+	public Date getValue()
+	{
+		return value;
+	}
+
+	@Kroll.setProperty @Kroll.method
+	public void setValue(Date value)
+	{
+		this.value = value;
+	}
+
 	@Kroll.getProperty @Kroll.method
 	public boolean getUseSpinner()
 	{
@@ -564,6 +580,7 @@ public class PickerProxy extends TiViewProxy implements PickerColumnListener
 						KrollDict data = new KrollDict();
 						data.put("cancel", false);
 						data.put("value", value);
+						setValue(value);
 						callback.callAsync(getKrollObject(), new Object[]{ data });
 					}
 				}
@@ -578,6 +595,7 @@ public class PickerProxy extends TiViewProxy implements PickerColumnListener
 						KrollDict data = new KrollDict();
 						data.put("cancel", true);
 						data.put("value", null);
+						setValue(value);
 						callback.callAsync(getKrollObject(), new Object[]{ data });
 					}
 				}
@@ -679,6 +697,7 @@ public class PickerProxy extends TiViewProxy implements PickerColumnListener
 		Calendar calendar = Calendar.getInstance();
 		if (settings.containsKey("value")) {
 			calendar.setTime(TiConvert.toDate(settings, "value"));
+			setValue(value);
 		}
 
 		final KrollFunction callback;
@@ -709,6 +728,7 @@ public class PickerProxy extends TiViewProxy implements PickerColumnListener
 						KrollDict data = new KrollDict();
 						data.put("cancel", false);
 						data.put("value", value);
+						setValue(value);
 						callback.callAsync(getKrollObject(), new Object[]{ data });
 					}
 				}
@@ -723,6 +743,7 @@ public class PickerProxy extends TiViewProxy implements PickerColumnListener
 						KrollDict data = new KrollDict();
 						data.put("cancel", true);
 						data.put("value", null);
+						setValue(value);
 						callback.callAsync(getKrollObject(), new Object[]{ data });
 					}
 				}

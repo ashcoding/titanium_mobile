@@ -18,6 +18,7 @@ import org.appcelerator.titanium.util.TiConvert;
 import org.appcelerator.titanium.util.TiUIHelper;
 import org.appcelerator.titanium.view.TiUIView;
 
+import ti.modules.titanium.ui.PickerProxy;
 import android.app.Activity;
 import android.os.Build;
 import android.widget.DatePicker;
@@ -153,7 +154,11 @@ public class TiUIDatePicker extends TiUIView
 			data.put("value", targetCalendar.getTime());
 			fireEvent("change", data);
 		}
-		proxy.setProperty("value", targetCalendar.getTime());
+		if (proxy instanceof PickerProxy) {
+			((PickerProxy) proxy).setValue(targetCalendar.getTime());
+		} else {
+			proxy.setProperty("value", targetCalendar.getTime());
+		}
 	}
 	
 	public void setValue(long value)
