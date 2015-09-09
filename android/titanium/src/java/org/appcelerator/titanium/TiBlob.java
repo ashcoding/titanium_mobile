@@ -629,8 +629,10 @@ public class TiBlob extends KrollProxy
 		
 		Bitmap b = mMemoryCache.get(hash);
         if (b != null) {
+            Log.d("TiAsh", "Image cached");
             return blobFromImage(b);
         } else {
+            Log.d("TiAsh", "Image not cached");
             Log.i(TAG, "Image isn't cached");
             try {
                 Matrix matrix = new Matrix();
@@ -710,37 +712,58 @@ public class TiBlob extends KrollProxy
 			rotation = TiImageHelper.getOrientation(getNativePath());
 		}
 		
-		try {
-			Bitmap imageResized = null;
-			imgWidth = img.getWidth();
-			imgHeight = img.getHeight();
-			if (rotation != 0) {
-				float scaleWidth = (float)dstWidth/imgWidth;
-				float scaleHeight = (float)dstHeight/imgHeight;
-				Matrix matrix = new Matrix();
-				//resize
-				matrix.postScale(scaleWidth, scaleHeight);
-				//rotate
-				matrix.postRotate(rotation);
-				imageResized = Bitmap.createBitmap(img, 0, 0, img.getWidth(), img.getHeight(), matrix, true);
-			} else {
-				imageResized = Bitmap.createScaledBitmap(img, dstWidth, dstHeight, true);
-			}
-			if (img != image && img != imageResized) {
-				img.recycle();
-				img = null;
-			}
-			return blobFromImage(imageResized);
-		} catch (OutOfMemoryError e) {
-			Log.e(TAG, "Unable to resize the image. Not enough memory: " + e.getMessage(), e);
-			return null;
-		} catch (IllegalArgumentException e) {
-			Log.e(TAG, "Unable to resize the image. Illegal Argument: " + e.getMessage(), e);
-			return null;
-		} catch (Throwable t) {
-			Log.e(TAG, "Unable to resize the image. Unknown exception: " + t.getMessage(), t);
-			return null;
-		}
+        int result = 17;
+        final int constant = 37;
+        //result = result * constant + img.hashCode();
+        result = result * constant + dstWidth;
+        result = result * constant + dstHeight;
+        result = result * constant + imgWidth;
+        result = result * constant + imgHeight;
+        result = result * constant + rotation;
+        
+        int hash = result;
+        Log.d("TiAsh", "Find Hashcode:"+hash);
+        Bitmap b = mMemoryCache.get(hash);
+        if (b != null) {
+            Log.d("TiAsh", "Image cached");
+            return blobFromImage(b);
+        } else {
+            Log.d("TiAsh", "Image not cached");
+            try {
+                Bitmap imageResized = null;
+                imgWidth = img.getWidth();
+                imgHeight = img.getHeight();
+                if (rotation != 0) {
+                    float scaleWidth = (float)dstWidth/imgWidth;
+                    float scaleHeight = (float)dstHeight/imgHeight;
+                    Matrix matrix = new Matrix();
+                    //resize
+                    matrix.postScale(scaleWidth, scaleHeight);
+                    //rotate
+                    matrix.postRotate(rotation);
+                    imageResized = Bitmap.createBitmap(img, 0, 0, img.getWidth(), img.getHeight(), matrix, true);
+                } else {
+                    imageResized = Bitmap.createScaledBitmap(img, dstWidth, dstHeight, true);
+                }
+                if (img != image && img != imageResized) {
+                    img.recycle();
+                    img = null;
+                }
+                Log.d("TiAsh", "Put Hashcode:"+hash);
+                mMemoryCache.put(hash, imageResized);
+                return blobFromImage(imageResized);
+            } catch (OutOfMemoryError e) {
+                Log.e(TAG, "Unable to resize the image. Not enough memory: " + e.getMessage(), e);
+                return null;
+            } catch (IllegalArgumentException e) {
+                Log.e(TAG, "Unable to resize the image. Illegal Argument: " + e.getMessage(), e);
+                return null;
+            } catch (Throwable t) {
+                Log.e(TAG, "Unable to resize the image. Unknown exception: " + t.getMessage(), t);
+                return null;
+            }
+        }		
+
 	}
 
 	@Kroll.method
