@@ -24,6 +24,7 @@ import org.appcelerator.kroll.util.KrollStreamHelper;
 import org.appcelerator.titanium.io.TiBaseFile;
 import org.appcelerator.titanium.io.TitaniumBlob;
 import org.appcelerator.titanium.util.TiImageHelper;
+import org.appcelerator.titanium.util.TiImageLruCache;
 import org.appcelerator.titanium.util.TiMimeTypeHelper;
 
 import android.graphics.Bitmap;
@@ -75,6 +76,9 @@ public class TiBlob extends KrollProxy
 	private String mimetype;
 	private Bitmap image;
 	private int width, height;
+	
+	// This handles the memory cache of images.
+    private TiImageLruCache mMemoryCache = TiImageLruCache.getInstance();
 
 	private TiBlob(int type, Object data, String mimetype)
 	{
@@ -612,27 +616,55 @@ public class TiBlob extends KrollProxy
 		int heightCropped = options.optInt(TiC.PROPERTY_HEIGHT, height);
 		int x = options.optInt(TiC.PROPERTY_X, (width - widthCropped) / 2);
 		int y = options.optInt(TiC.PROPERTY_Y, (height - heightCropped) / 2);
-		try {
-			Matrix matrix = new Matrix();
-			//rotate
-			matrix.postRotate(rotation);
-			Bitmap imageCropped = Bitmap.createBitmap(img, x, y, widthCropped, heightCropped, matrix, true);
-			if (img != image && img != imageCropped) {
-				img.recycle();
-				img = null;
-			}
-			
-			return blobFromImage(imageCropped);
-		} catch (OutOfMemoryError e) {
-			Log.e(TAG, "Unable to crop the image. Not enough memory: " + e.getMessage(), e);
-			return null;
-		} catch (IllegalArgumentException e) {
-			Log.e(TAG, "Unable to crop the image. Illegal Argument: " + e.getMessage(), e);
-			return null;
-		} catch (Throwable t) {
-			Log.e(TAG, "Unable to crop the image. Unknown exception: " + t.getMessage(), t);
-			return null;
-		}
+
+		int result = 17;
+		final int constant = 37;
+		result = result * constant + img.hashCode();
+		result = result * constant + widthCropped;
+		result = result * constant + heightCropped;
+		result = result * constant + x;
+		result = result * constant + y;
+		
+		int hash = result;
+		
+		Bitmap b = mMemoryCache.get(hash);
+        if (b != null) {
+            return blobFromImage(b);
+        } else {
+            Log.i(TAG, "Image isn't cached");
+            try {
+                Matrix matrix = new Matrix();
+                //rotate
+                matrix.postRotate(rotation);
+                Bitmap imageCropped = Bitmap.createBitmap(img, x, y, widthCropped, heightCropped, matrix, true);
+                if (img != image && img != imageCropped) {
+                    img.recycle();
+                    img = null;
+                }
+                mMemoryCache.put(hash, imageCropped);
+                return blobFromImage(imageCropped);
+            } catch (OutOfMemoryError e) {
+                Log.e(TAG, "Unable to crop the image. Not enough memory: " + e.getMessage(), e);
+                return null;
+            } catch (IllegalArgumentException e) {
+                Log.e(TAG, "Unable to crop the image. Illegal Argument: " + e.getMessage(), e);
+                return null;
+            } catch (Throwable t) {
+                Log.e(TAG, "Unable to crop the image. Unknown exception: " + t.getMessage(), t);
+                return null;
+            }
+        }
+
+	}
+	
+	public void addBitmapToMemoryCache(Integer key, Bitmap bitmap) {
+	    if (getBitmapFromMemCache(key) == null) {
+	        mMemoryCache.put(key, bitmap);
+	    }
+	}
+
+	public Bitmap getBitmapFromMemCache(Integer key) {
+	    return mMemoryCache.get(key);
 	}
 
 	@Kroll.method
