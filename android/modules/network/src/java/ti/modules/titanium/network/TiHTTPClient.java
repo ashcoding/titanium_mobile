@@ -1259,8 +1259,8 @@ public class TiHTTPClient
 
 	    	printWriter.append("--" + boundary).append(LINE_FEED);
 	    	printWriter.append("Content-Disposition: form-data; name=\"" + name + "\"");
-	    	if(fileName != null){
-	    		printWriter.append("\"; filename=\"" + fileName + "\"");
+	    	if (fileName != null) {
+	    		printWriter.append("; filename=\"" + fileName + "\"");
 	    	}
 	    	printWriter.append(LINE_FEED);
 	    	printWriter.append("Content-Type: " + contentBody.getMimeType());
