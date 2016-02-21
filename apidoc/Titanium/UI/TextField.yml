@@ -64,7 +64,7 @@ methods:
     description: |
          Selects the text in range (start, end). If start equals end, no text will be selected, 
          and the cursor will move to the start position. End is not inclusive, meaning setSelection(0,0) 
-         will not select the first character, but will move the cursor to the position before the first character.
+         will not select the firsit character, but will move the cursor to the position before the first character.
          
          On iOS, soft keyboard would show when text is selected.
          
@@ -303,7 +303,7 @@ properties:
     default: Default Android theme's hint text color.
 
   - name: inputType
-    summary: Input type to accept in thetext field. Also influences the Keyboard type to display.
+    summary: Input type to accept in the text field. Also influences the Keyboard type to display.
     description: |
         When asking for a specific kind of user input, such as a phone number or email 
         address, you should always specify the input type that is accepted. This overrides
