@@ -879,6 +879,11 @@ public class TiC
 	/**
 	 * @module.api
 	 */
+	public static final String PROPERTY_BLACKLISTED_URLS = "blacklistedURLs";
+
+	/**
+	 * @module.api
+	 */
 	public static final String PROPERTY_BORDER_COLOR = "borderColor";
 
 	/**
