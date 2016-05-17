@@ -1973,6 +1973,11 @@ public class TiC
 	/**
 	 * @module.api
 	 */
+	public static final String PROPERTY_ON_STOP_BLACKISTED_URL = "onStopBlacklistedUrl";
+
+	/**
+	 * @module.api
+	 */
 	public static final String PROPERTY_TLS_VERSION = "tlsVersion";
 
 	/**
