@@ -6,10 +6,13 @@
  */
 package org.appcelerator.titanium;
 
+import org.appcelerator.kroll.KrollDict;
 import org.appcelerator.kroll.common.Log;
+import org.appcelerator.titanium.proxy.IntentProxy;
 import org.appcelerator.titanium.util.TiActivitySupport;
 import org.appcelerator.titanium.util.TiRHelper;
 
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -106,12 +109,36 @@ public class TiRootActivity extends TiLaunchActivity
 		getIntent().putExtra(TiC.PROPERTY_FULLSCREEN, appInfo.isFullscreen());
 		super.windowCreated(savedInstanceState);
 	}
-
+	
 	@Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+    }
+
+    @Override
 	protected void onResume()
 	{
 		Log.checkpoint(TAG, "checkpoint, on root activity resume. activity = " + this);
 		super.onResume();
+		
+        // Get the intent that started this activity
+        // Get intent, action and MIME type
+        Intent intent = getIntent();
+        String action = intent.getAction();
+        String type = intent.getType();
+        Log.d("TiAPI", "OnResume");
+        if (intent != null) {
+            // Figure out what to do based on the intent type
+            if ("text/plain".equals(type)) {
+                String data = intent.getStringExtra(Intent.EXTRA_TEXT);
+                Log.d("TiAPI", "This is the data:"+data);
+            }
+            
+            KrollDict data = new KrollDict();
+            data.put(TiC.EVENT_PROPERTY_INTENT, new IntentProxy(intent));
+            activityProxy.fireEvent("onFilterIntent", data);
+        }
 	}
 
 	@Override
