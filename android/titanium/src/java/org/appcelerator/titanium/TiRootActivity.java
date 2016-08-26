@@ -6,10 +6,13 @@
  */
 package org.appcelerator.titanium;
 
+import org.appcelerator.kroll.KrollDict;
 import org.appcelerator.kroll.common.Log;
+import org.appcelerator.titanium.proxy.IntentProxy;
 import org.appcelerator.titanium.util.TiActivitySupport;
 import org.appcelerator.titanium.util.TiRHelper;
 
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -112,6 +115,21 @@ public class TiRootActivity extends TiLaunchActivity
 	{
 		Log.checkpoint(TAG, "checkpoint, on root activity resume. activity = " + this);
 		super.onResume();
+
+		// Get the intent that started this activity
+		Intent intent = getIntent();
+		if (intent != null) {
+		    KrollDict data = new KrollDict();
+		    data.put(TiC.EVENT_PROPERTY_INTENT, new IntentProxy(intent));
+		    activityProxy.fireEvent(TiC.PROPERTY_ON_INTENT, data);
+		}
+	}
+
+	@Override
+	protected void onNewIntent(Intent intent)
+	{
+	    super.onNewIntent(intent);
+	    setIntent(intent);
 	}
 
 	@Override
